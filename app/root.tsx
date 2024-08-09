@@ -17,7 +17,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <main className="relative h-screen bg-slate-800 bg-gradient-to-tr overflow-auto">
+          {children}
+        </main>
         <ScrollRestoration />
         <Scripts />
       </body>

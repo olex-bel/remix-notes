@@ -1,0 +1,18 @@
+DROP DATABASE IF EXISTS notes;
+
+CREATE DATABASE notes
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'C.UTF-8'
+    LC_CTYPE = 'C.UTF-8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+CREATE TABLE IF NOT EXISTS notes (
+	id serial PRIMARY KEY,
+	body VARCHAR NOT NULL,
+	colors VARCHAR NOT NULL,
+	position VARCHAR NOT NULL
+);
