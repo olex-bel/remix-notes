@@ -1,6 +1,6 @@
 
 import NoteCard from "./NoteCard"
-import type { Note } from "~/db/fake.data.server"
+import type { Note } from "../db/databases.server"
 
 type NoteCardsProps = {
     notes: Note[];

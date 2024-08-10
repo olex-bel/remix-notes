@@ -1,9 +1,11 @@
 
-import { useRef, useEffect, useState } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useRef, useState, useContext } from "react";
 import { RiDeleteBin5Line } from "@remixicon/react";
-import { autoGrow, setNewOffset } from "~/utils/cartUtils";
-import type { Note } from "~/db/fake.data.server";
+import { NotesContext } from "~/providers/NotesContext";
+import NoteTextArea from "./NoteTextArea";
+import { setNewOffset } from "~/utils/cartUtils";
+import { useNoteCardActions } from "~/hooks/useNoteCardActions";
+import type { Note } from "~/db/databases.server";
 import type { MouseEvent as ReactMouseEvent } from "react";
 
 type NoteCardProps = {
@@ -11,43 +13,13 @@ type NoteCardProps = {
 }
 
 export default function NoteCard({ note }: NoteCardProps) {
-    const [position, setPositon] = useState(JSON.parse(note.position));
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const [position, setPositon] = useState({ x: note.pos_x, y: note.pos_y});
     const cardRef = useRef<HTMLDivElement>(null);
-    const fetcher = useFetcher({ key: `card-${note.id}` });
-    const keyUpTimer = useRef<NodeJS.Timeout | null>(null);
+    const { colors, setActiveNoteId } = useContext(NotesContext);
+    const { updatePosition, updateBodyContent, isSaving } = useNoteCardActions(note.id);
     const mouseStartPos = { x: 0, y: 0 };
-    const colors = JSON.parse(note.colors);
-    const body = JSON.parse(note.body);
-    const handleInput = () => {
-        if (textAreaRef.current) {
-            autoGrow(textAreaRef.current);
-        }
-    };
-    const savePosition = (newPosition: { x: number, y: number }) => {
-        const formData = new FormData();
-        formData.append("position", JSON.stringify(newPosition));
-        formData.append("id", note.id + "");
-        fetcher.submit(formData, {
-            method: "POST",
-            action: "?index",
-        });
-    }
-    const handleKeyUp = async () => {
-        if (keyUpTimer.current) {
-            clearTimeout(keyUpTimer.current);
-        }
-     
-        keyUpTimer.current = setTimeout(() => {
-            const formData = new FormData();
-            formData.append("body", JSON.stringify(textAreaRef.current.value));
-            formData.append("id", note.id + "");
-            fetcher.submit(formData, {
-                method: "POST",
-                action: "?index",
-            });
-        }, 2000);
-    };
+    const cardColors = colors.find(color => color.id === note.color_id);
+    const body = note.body? JSON.parse(note.body) : "";
     const handleMouseDown = (e: ReactMouseEvent) => {
         mouseStartPos.x = e.clientX;
         mouseStartPos.y = e.clientY;
@@ -76,29 +48,29 @@ export default function NoteCard({ note }: NoteCardProps) {
 
         if (cardRef.current) {
             const newPosition = setNewOffset(cardRef.current);
-            savePosition(newPosition);
+
+            if (note.pos_x !== newPosition.x || note.pos_y !== newPosition.y) {
+                updatePosition(newPosition);
+            }
         }
+
+        setActiveNoteId(note.id);
     };
- 
-    useEffect(() => {
-        if (textAreaRef.current) {
-            autoGrow(textAreaRef.current);
-        }
-    }, [])
+    const handleTextChanged = (newBody: string) => updateBodyContent(newBody);
 
     return (
         <div  
             ref={cardRef}
             className="w-96 rounded-md cursor-pointer shadow-sm absolute"
             style={{
-                backgroundColor: colors.colorBody,
+                backgroundColor: cardColors?.body,
                 left: `${position.x}px`,
                 top: `${position.y}px`,
             }}
         >
             <div
                 className="flex justify-space items-center p-1.5 rounded-t-sm"
-                style={{ backgroundColor: colors.colorHeader }}
+                style={{ backgroundColor: cardColors?.header }}
                 role="button"
                 tabIndex={0}
                 onMouseDown={handleMouseDown}
@@ -106,21 +78,18 @@ export default function NoteCard({ note }: NoteCardProps) {
                 <RiDeleteBin5Line />
 
                 {
-                    fetcher.state === "submitting" && (
+                    isSaving && (
                         <div className="card-saving">
-                            <span style={{ color: colors.colorText }}>Saving...</span>
+                            <span style={{ color: cardColors?.text }}>Saving...</span>
                         </div>
                     )
                 }
             </div>
             <div className="p-1 rounded-b-sm">
-                <textarea
-                    ref={textAreaRef}
-                    className="bg-inherit border-none w-full h-full resize-none text-base focus:outline-none"
-                    style={{ color: colors.colorText }}
-                    defaultValue={body}
-                    onInput={handleInput}
-                    onKeyUp={handleKeyUp}
+                <NoteTextArea 
+                    body={body}
+                    colorText={cardColors?.text}
+                    onTextChanged={handleTextChanged}
                 />
             </div>
         </div>

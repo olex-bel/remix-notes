@@ -1,7 +1,7 @@
 
 import { json } from "@remix-run/node";
 import type { ActionFunctionArgs } from "@remix-run/node";
-import { updatePosition, updateBody } from "~/db/databases.server";
+import { updatePosition, updateBody, updateColor } from "~/db/databases.server";
 
 export const action = async ({
     request,
@@ -23,13 +23,21 @@ export const action = async ({
 
     switch (actionType) {
         case "update_position": {
-            const position = formData.get("position") as string | null;
-            if (!position) {
+            const x = formData.get("x") as string | null;
+            const y = formData.get("y") as string | null;
+            if (!x || !y) {
                 return json({ error: true, message: "Position' is required." }, { status: 400 });
             }
 
+            const xPos = Number(x);
+            const yPos = Number(y);
+
+            if (isNaN(xPos) || isNaN(yPos)) {
+                return json({ error: true, message: "Position (x and y) must be valid numbers." }, { status: 400 });
+            }
+
             try {
-                await updatePosition(+params.id, position);
+                await updatePosition(+params.id, xPos, yPos);
                 return json({ error: false, message: "Position updated successfully." });
             } catch (error) {
                 console.error("Error updating position:", error);
@@ -49,6 +57,21 @@ export const action = async ({
             } catch (error) {
                 console.error("Error updating body:", error);
                 return json({ error: true, message: "Failed to update body content." }, { status: 500 });
+            }
+        }
+
+        case "update_color": {
+            const colorId = formData.get("color_id") as string | null;
+            if (!colorId) {
+                return json({ error: true, message: "Color Id is required." }, { status: 400 });
+            }
+
+            try {
+                await updateColor(+params.id, colorId);
+                return json({ error: false, message: "Color updated successfully." });
+            } catch (error) {
+                console.error("Error updating body:", error);
+                return json({ error: true, message: "Failed to update color." }, { status: 500 });
             }
         }
 
