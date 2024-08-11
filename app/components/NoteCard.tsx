@@ -1,11 +1,11 @@
 
 import { useRef, useState, useContext } from "react";
-import { RiDeleteBin5Line } from "@remixicon/react";
+import { DeleteButton } from "./DeleteButton";
 import { NotesContext } from "~/providers/NotesContext";
 import NoteTextArea from "./NoteTextArea";
 import { setNewOffset } from "~/utils/cartUtils";
-import { useNoteCardActions } from "~/hooks/useNoteCardActions";
-import type { Note } from "~/db/databases.server";
+import { useNoteUpdateActions } from "~/hooks/useNoteUpdateActions";
+import type { Note } from "~/model/notes.server";
 import type { MouseEvent as ReactMouseEvent } from "react";
 
 type NoteCardProps = {
@@ -16,7 +16,7 @@ export default function NoteCard({ note }: NoteCardProps) {
     const [position, setPositon] = useState({ x: note.pos_x, y: note.pos_y});
     const cardRef = useRef<HTMLDivElement>(null);
     const { colors, setActiveNoteId } = useContext(NotesContext);
-    const { updatePosition, updateBodyContent, isSaving } = useNoteCardActions(note.id);
+    const { updatePosition, updateBodyContent, isSubbmited } = useNoteUpdateActions(note.id);
     const mouseStartPos = { x: 0, y: 0 };
     const cardColors = colors.find(color => color.id === note.color_id);
     const body = note.body? JSON.parse(note.body) : "";
@@ -75,12 +75,11 @@ export default function NoteCard({ note }: NoteCardProps) {
                 tabIndex={0}
                 onMouseDown={handleMouseDown}
             >
-                <RiDeleteBin5Line />
-
+                <DeleteButton noteId={note.id} />
                 {
-                    isSaving && (
+                    isSubbmited && (
                         <div className="card-saving">
-                            <span style={{ color: cardColors?.text }}>Saving...</span>
+                            <span style={{ color: cardColors?.text }}>Processing...</span>
                         </div>
                     )
                 }

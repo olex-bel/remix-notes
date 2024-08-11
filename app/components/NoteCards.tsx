@@ -1,6 +1,6 @@
 
 import NoteCard from "./NoteCard"
-import type { Note } from "../db/databases.server"
+import type { Note } from "../model/notes.server"
 
 type NoteCardsProps = {
     notes: Note[];

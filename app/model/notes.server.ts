@@ -63,8 +63,14 @@ export async function updateColor(id: number, colorId: string) {
     await client.query("UPDATE notes SET color_id=$2 WHERE id=$1", [id, colorId]);
 }
 
-export async function createNote( x: number, y: number, colorId: string) {
+export async function createNote(x: number, y: number, colorId: string) {
     const client = await getDatabaseClient();
 
     await client.query("INSERT INTO notes (body, color_id, pos_x, pos_y) VALUES($1, $2, $3, $4)", ["", colorId, x, y]);
+}
+
+export async function deleteNote(id: number ) {
+    const client = await getDatabaseClient();
+
+    await client.query("DELETE FROM notes WHERE id=$1", [id]);
 }

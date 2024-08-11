@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useNoteFetcher } from "./useNoteFetcher";
 
-export const useNoteCardActions = (noteId: number) => {
-    const fetcher = useFetcher({ key: `card-${noteId}` });
+export const useNoteUpdateActions = (noteId: number) => {
+    const { fetcher, isSubbmited} = useNoteFetcher(noteId);
     const keyUpTimer = useRef<NodeJS.Timeout | null>(null);
 
     const updatePosition = (newPosition: { x: number, y: number }) => {
@@ -10,7 +10,7 @@ export const useNoteCardActions = (noteId: number) => {
         formData.append("x", newPosition.x.toString());
         formData.append("y", newPosition.y.toString());
         formData.append("_action", "update_position");
-        fetcher.submit(formData, { method: "POST", action: `note/${noteId}` });
+        fetcher.submit(formData, { method: "POST", action: `notes/${noteId}` });
     };
 
     const updateBodyContent = (bodyContent: string) => {
@@ -22,21 +22,13 @@ export const useNoteCardActions = (noteId: number) => {
             const formData = new FormData();
             formData.append("body", JSON.stringify(bodyContent));
             formData.append("_action", "update_body");
-            fetcher.submit(formData, { method: "POST", action: `note/${noteId}` });
+            fetcher.submit(formData, { method: "POST", action: `notes/${noteId}` });
         }, 2000);
-    };
-
-    const updateColor = (colorId: string) => {
-        const formData = new FormData();
-        formData.append("color_id", colorId);
-        formData.append("_action", "update_color");
-        fetcher.submit(formData, { method: "POST", action: `note/${noteId}` });
     };
 
     return {
         updatePosition,
         updateBodyContent,
-        updateColor,
-        isSaving: fetcher.state === "submitting",
+        isSubbmited,
     };
 };

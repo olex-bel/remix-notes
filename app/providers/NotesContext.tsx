@@ -1,16 +1,16 @@
 import { createContext } from "react";
-import type { Color } from "~/db/databases.server";
+import type { Color } from "~/model/notes.server";
 
 type NotesContextType = {
     activeNoteId: number | null;
     colors: Color[];
-    setActiveNoteId: (id: number) => void;
+    setActiveNoteId: (id: number | null) => void;
 };
 
 export const NotesContext = createContext<NotesContextType>({
     activeNoteId: null,
     colors: [],
-    setActiveNoteId: (_: number) => {},
+    setActiveNoteId: (_: number | null) => {},
 });
 
 export function converColorsToMap(colors: Color[]) {
