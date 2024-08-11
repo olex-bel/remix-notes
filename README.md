@@ -1,6 +1,7 @@
-# Welcome to Remix!
+# Note manager
 
-- 📖 [Remix docs](https://remix.run/docs)
+- Implementation of a note manager in the Remix framework
+[Original implementation](https://sticky-fcc.vercel.app/)
 
 ## Development
 
