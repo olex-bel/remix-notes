@@ -16,8 +16,6 @@ export function DeleteButton({ noteId }: DeleteButtonProps) {
         if (activeNoteId === noteId) {
             setActiveNoteId(null);
         }
-
-        fetcher.submit(event.currentTarget);
     };
 
     return (
